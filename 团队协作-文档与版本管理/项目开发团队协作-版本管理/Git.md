@@ -4,7 +4,7 @@
 
 语义化版本遵循下述的格式：
 
-<img src="Untitled.assets/image-20200328221143094.png" alt="image-20200328221143094" style="zoom:50%;" />
+<img src="../Untitled.assets/image-20200328221143094.png" alt="image-20200328221143094" style="zoom:50%;" />
 
 + 修订号的更新代表小`bug`的更新；
 + 次版本的更新代表`API`的更新或迭代；
