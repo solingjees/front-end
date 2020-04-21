@@ -302,6 +302,17 @@ git push origin1 master
   + `git remote`配置远程仓库的连接;
   + `git pull`来拉取远程仓库到本地；
 
++ `git add`：用于将工作区的修改放入暂存区，主要有以下操作：
+
+  + `git add .`：将已经被监视的修改的文件、删除的文件、新文件的更新放入暂存区，老版本的`git`会忽略删除的文件；
+  + `git add -u`：在`git add .`的基础上，添加不包括新文件的限制，新文件不会被放入暂存区；
+  + `git add -A`：在之前两个的基础上，将被重命名的文件的更新放入暂存区，即将新建、修改、删除、重命名四大操作的修改都放入暂存区；
+
++ `git commit`：推送暂存区的文件更新到本地版本仓库，主要有以下操作：
+
+  + `git commit -m <comment content>`：给`commit`添加`comment`；
+  + `git commit --allow-empty -m <comment content>`：在前者的基础上，允许`commit`的修改内容为空；
+
 + `git push`：用于将本地所有从上一次`git push`开始的所有`commit`同步到远程仓库，以下几个命令比较常用：
 
   + `git push 远程仓库名称 本地分支:远程分支`：该命令可以将某个本地分支的`commit`推送到远程仓库某个分支；
@@ -309,6 +320,7 @@ git push origin1 master
   + `git push 远程仓库名称 :refs/tags/标签名`：该命令用于删除远程仓库的`tag`；（`:`起头代表删除）
   + `git push 远程仓库名称 :远程仓库分支名`：该命令用于删除远程仓库的分支；
   + `git push 远程仓库名称 远程分支 --force`：该命令非常危险，请勿使用，如果远程仓库版本比本地新，`git`会要求开发者先`git pull`更新本地代码， 然后再推送，而有些偷懒的开发者会直接使用`git push xxx xxx -f`来强制推送，导致远程仓库的更新的版本全部被覆盖，即其他开发者所推送的新版本全部被删除；
+  + `git push --quiet 远程仓库名称 远程分支`：隐藏所有打印消息；
 
 + `git remote`：用于操作远程仓库，我们经常使用以下命令：
 
@@ -318,12 +330,14 @@ git push origin1 master
 
   + `git remote add 远程仓库名称 远程仓库地址`：添加本地仓库和远程仓库的连接信息；
 
+  + `git remote add --fetch 远程仓库名称 远程仓库地址`：在添加完连接信息后立即开始拉取代码更新，同时更新代码分支信息；
+
 + `git pull`：用于本地代码更新，相当于以下两个命令的执行：
 
   + `git fetch `将分支的更新进行下载；
   + `git merge`将分支的更新和本地仓库进行合并；
 
-+ `git fetch`：用于拉取远程仓库的更新，经常用的命令有：
++ `git fetch`：用于拉取远程仓库的更新，该操作会拉取所有更新放入一个临时区域，然后更新本地分支信息，但是不会切换分支，可以用于检测远程分支的存在性，经常用的命令有：
 
   + `git fetch`：查看远程仓库的更新信息；
   + `git fetch origin feature:dev1`：将远程的`feature`分支下载到`dev1`分支，如果不存在`dev1`分支会自动创建；
@@ -384,6 +398,7 @@ git push origin1 master
   + `git checkout dev`：切换到`dev`分支；
   + `git checkout -b dev`：创建并切换到`dev`分支；
   + `git checkout -- <filename>`：将工作区中的该文件恢复到最近一次`git commit`或`git add`时的状态；
+  + ` git checkout --orphan gh-pages `：将当前分支的最新`commit copy`到新建分支`gh-pages`的工作区内；
 
 + `git status`：显示当前暂存区的状态和工作区的修改状态等；
 
@@ -404,6 +419,34 @@ git push origin1 master
   + `git tag -d <tagname>`：删除某一次`tag`；
   + `git tag -l`：展示所有的`tag`;
   + `git push origin :refs/tags/标签名`：删除远程仓库的某一个`tag`；
+  
++ `git rm`：用于删除文件，主要有以下用法：
+
+  + `git rm --cached -r a.txt`：删除版本库和暂存区的`a.txt`文件，即该文件不会再被`git`所监视，物理机上依然存在该文件；
+
++ `git rebase`：修改当前的分支的`base`，可以控制`commit`版本历史，比较常用的有以下操作：
+
+  + `git rebase -i head~3`：对最近3次的`commit`记录进行操作，在此之前会要求工作区没有新的更改；
+
+    然后会打开交互式界面来操作最近3次的`commit`记录，主要的操作有：
+
+    + `pick`：选择某一`commit`作为所操作的`base`；
+    + `reword`：在`pick`的基础上，修改提交说明；
+    + `squash`：融合该`commit`到所`pick`的`commit base`上，`squash`不能放在最新的`commit`上；
+
+    如下图所示，将`792f1cb`和`2f9066a`两次`commit`融合到`a175ffe commit`上；
+
+    <img src="Git.assets/image-20200418170306361.png" alt="image-20200418170306361" style="zoom:50%;" />
+
+    当我们完成了操作后，我们需要给当前新的生成的`commit`修改`comment`；
+
+    <img src="Git.assets/image-20200418171045771.png" alt="image-20200418171045771" style="zoom:33%;" />
+
+    我们可以使用`vim`编辑器的`d10d`快捷操作来快速删除`10`行`content`，然后自行输入新的`content`来生成我们的新的`comment`内容，最后`:wq`退出即可生成新的`commit`并书写了新的`comment`，这时，我们当前的版本也会改为这次`commit`；
+
++ `git rev-parse`：输出、验证分支信息等，主要使用以下操作：
+
+  + `git rev-parse --verify origin/gh-pages`：验证分支`origin/gh-pages`是否存在；
 
 # Git Flow
 
