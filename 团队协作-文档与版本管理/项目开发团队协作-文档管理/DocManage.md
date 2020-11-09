@@ -220,6 +220,8 @@ firewall-cmd --reload
 
 <img src="DocManage.assets/image-20200328113342532.png" alt="image-20200328113342532" style="zoom:50%;" />
 
+右上角还有一个`分享`的功能，我们能生成一个链接/二维码供其他人来查看我们的文档；
+
 我们新建页面，设置`标题`（、`目录`、`序号`）等元信息，如果需要编写`API接口文档`，可以直接选择插入`API接口模板`选项快速生成`API接口文档`，并在此基础上进行修改：
 
 <img src="DocManage.assets/image-20200328113547538.png" alt="image-20200328113547538" style="zoom:50%;" />

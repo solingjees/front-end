@@ -60,12 +60,12 @@ docker run  --name jenkins_imooc -itd -p 11005:8080 -p 50000:50000 jenkins/jenki
 
 ```yaml
 version: '3'
-service:
+services:
    jenkins:
       container_name: 'jenkins'
       image: jenkins/jenkins:lts
       restart: always
-      user: jenkins:994                                                                   
+      user: jenkins:994 //user格式为用户名：组名，这里必须要和docker用户在同一个组里，否则jenkins无法使用docker命令，进而无法配置自动化流程，使用cta /etc/group查看组
       ports:                                                        
         - "10050:8080"
         - "50000:50000"
@@ -320,6 +320,8 @@ docker cp <container hash值>:/var/jenkins_home /tmp/
 
 ## 基于私有化部署的`GitLab`的权限控制
 
+在实际的开发中，我们的`GitLab`的成员权限应当和`Jenkins`的权限相同；
+
 我们跟随`系统管理->全局安全配置->授权策略`，选择`GitHub Committer Authorization Strategy`；
 
 然后我们可以在`GitLab Authorization Settings`中配置一些权限，其中经常使用的权限是：
@@ -332,13 +334,13 @@ docker cp <container hash值>:/var/jenkins_home /tmp/
 
 <img src="Jenkins.assets/image-20200422002757046.png" alt="image-20200422002757046" style="zoom:50%;" />
 
-然后，我们必须要将我们的`Jenkins`和`GitLab`进行连接，我们跟随`系统管理->全局安全配置->安全域`，选择`Gitlab Authentication Plugin`配置`GitLab`的对接；
+然后，我们必须要配置`Jenkins`去拉取我们的私有化部署的`GitLab`的成员权限，我们跟随`系统管理->全局安全配置->安全域`，选择`Gitlab Authentication Plugin`；
 
 <img src="Jenkins.assets/image-20200422015504212.png" alt="image-20200422015504212" style="zoom:50%;" />
 
-为了授权`Jenkins`连接`GitLab`，我们需要在`GitLab`上生成一个`System OAuth application`，相当于生成账户和密码供`Jenkins`接入我们的私有化部署的`GitLab`平台，我们跟随`管理中心->应用->New Application`来创建一个新的`application`：
+为了授权`Jenkins`使用`GitLab`的成员权限，我们需要在`GitLab`上生成一个`System OAuth application`，类似`ssh` 密钥，将该`application`配置到`Git Authentication Plugin`即可完成权限授予；我们在`GitLab`上，跟随`管理中心->应用->New Application`来创建一个新的`application`：
 
-我们首先设置`application`的名称，然后配置`Redirect URI`，这个`URI`就是`Jenkins`和`GitLab`通信的接口；`GitLab Authentication`要求我们在`GitLab`上的回调地址必须是以下格式，只有使用这个格式`GitLab Authentication`才能正确地接收到授权结果并作出响应；
+我们首先设置`application`的名称，然后配置`Redirect URI`，这个`URI`就是`GitLab`验证完`application`后的数据回送地址；`GitLab Authentication`要求我们在`GitLab`上的回送地址必须是以下格式，只有使用这个格式`GitLab Authentication Plugin`才能正确地接收到回送数据；
 
 ```
 http://<根路径>/securityRealm/finishLogin
@@ -346,11 +348,11 @@ http://<根路径>/securityRealm/finishLogin
 
 接着配置`Scopes`来设定该`application`的`GitLab`权限，直接选择第一个`api`，授予项目、群组的完整读写权限；
 
-最后，点击`submit`完成`application`的生成；如下图，会生成一个`application ID`和`applicaiton password`；
+最后，点击`submit`完成`application`的生成；如下图，会生成一个`application ID`和`applicaiton password`，就是密钥的账户和密码；
 
 <img src="Jenkins.assets/image-20200422020928983.png" alt="image-20200422020928983" style="zoom:50%;" />
 
-接着，我们需要在`Jenkins`的安全域中将生成的`application`配置进来：
+接着，我们在`Jenkins`的安全域中将生成的`application`配置进来：
 
 + `Client ID`：`application`的`ID`；
 + `Client Secret`：`application`的密码；
@@ -360,17 +362,17 @@ http://<根路径>/securityRealm/finishLogin
 
 <img src="Jenkins.assets/image-20200422021323947.png" alt="image-20200422021323947" style="zoom:50%;" />
 
-这样，我们就完成了`Jenkins`和`GitLab`的对接；
+这样，我们就完成了`Jenkins`从`GitLab`拉取数据的权限授予；
 
-但是，如果`Jenkins`和`GitLab`在同一台服务器上，可能会出现`Jenkins`无法对接`GitLab`的情况，可以查看`GitLab`上的`管理中心->设置->网络->外发请求`的`Allow requests to the local network from hooks and services`是否打开，该选项会允许`GitLab`向本机网络发送请求；
+但是，如果`Jenkins`和`GitLab`在同一台服务器上，可能会出现`Jenkins`无法从`GitLab`获得授权的情况，可以查看`GitLab`上的`管理中心->设置->网络->外发请求`的`Allow requests to the local network from hooks and services`是否打开，该选项会允许`GitLab`向本机网络发送请求，关闭后，`GitLab`将不可以往本机的其他服务器发送数据；
 
 <img src="Jenkins.assets/image-20200422022336198.png" alt="image-20200422022336198" style="zoom:50%;" />
 
-最后，当我们接下来首次从`Jenkins`登陆时，会自动重定向到私有化部署的`GitLab`上，询问是否授权`Jenkins`对我们的项目和群组的操作；
+最后，当我们接下来首次从`Jenkins`登陆时，会自动重定向到私有化部署的`GitLab`上，询问是否授权`Jenkins`权限；
 
 <img src="Jenkins.assets/image-20200422022444985.png" alt="image-20200422022444985" style="zoom:50%;" />
 
-到此为止，我们就完成了`GitLab`和`Jenkins`的权限对接；
+到此为止，我们就完成了`Jenkins`拉取`GitLab`的权限配置；
 
 ### `Jenkins`删除`Gitlab`的`安全域`和`权限策略`配置
 
@@ -426,4 +428,82 @@ exit
 ```
 docker restart <容器名>
 ```
+
+# `Jenkins`和`GitLab`的对接
+
+> 在进行对接前，要注意，`Jenkins`必须在`container`创建时设置了`user`，否则`ssh`仓库无法连接；
+
+首先我们在`GitLab`上新建一个项目，新建步骤参照以前`GitLab`的操作方式；
+
+如果我们新建一个`private`的项目，我们需要配置`ssh`密钥来使得`Jenkins`可以访问我们的项目；
+
+<img src="Jenkins.assets/image-20200422144606815.png" alt="image-20200422144606815" style="zoom:50%;" />
+
+然后，我们到`Jenkins`，跟随`凭据->系统->全局凭据->添加凭据`，然后我们选择类型为`SSH Username width private key`去配置一个`ssh`密钥连接；
+
+![image-20200422144911366](Jenkins.assets/image-20200422144911366.png)
+
+接着，我们在本地机上生成一个对`ssh`密钥，尽量使用新的`ssh`密钥，因为一般为了厘清不同密钥的使用场合，不会一对密钥用到底，比如，不要将用于项目部署的密钥对配置在最高管理员权限的场景；
+
+创建`ssh`密钥对的方式不再细讲，参照下图即可生成一对包含`passphrase`的密钥对；
+
+<img src="Jenkins.assets/image-20200422150250004.png" alt="image-20200422150250004" style="zoom:50%;" />
+
+然后我们将生成的`ssh`密钥的`private key`粘贴到`添加凭据`页面上的`Private Key`内，并输入`Passphrase`，外加`Username`等边缘信息，然后点击`确定`完成`Jenkins`凭据的生成；
+
+<img src="Jenkins.assets/image-20200422150759107.png" alt="image-20200422150759107" style="zoom:50%;" />
+
+然后我们到`GitLab`中配置`ssh`密钥的`Public Key`；我们跟随`管理中心->部署密钥->新建部署密钥`来新建一个部署密钥，将`Public Key`粘贴进来，然后点击`Create`新建即可；
+
+<img src="Jenkins.assets/image-20200422151123681.png" alt="image-20200422151123681" style="zoom:50%;" />
+
+但是，我们现在只是新建了`凭据`和`deploy key`，我们需要将该凭据和`deploy key`配置到`Jenkins`和`GitLab`的项目中才能开始使用；
+
+在`GitLab`中，我们跟随`<项目>->设置->CI/CD->deploy key`，点击`Expand`展开，选择`公开访问的部署密钥`，我们就能看见之前创建的`deploy key`，然后点击`启用`即可将该`deploy key`应用于当前项目；
+
+<img src="Jenkins.assets/image-20200422151655522.png" alt="image-20200422151655522" style="zoom:50%;" />
+
+然后在`Jenkins`中，我们新建一个`Task/Project`，在`Configure`页面上，我们点选`源码管理`的`Git`，然后在`Gitlab Repository URL`位置处输入我们`GitLab Project`的`ssh`地址，并选择之前配置的凭据作为`Credentials`，然后选择要构建的分支；
+
+<img src="Jenkins.assets/image-20200422161546013.png" alt="image-20200422161546013" style="zoom:50%;" />
+
+接着，我们需要配置`构建触发器`，用于监听`GitLab`的行为，进而触发自动化构建，比如`GitLab repository push event`，我们点选`构建触发器`下的`Build when a change is pushed to GitLab.GitLab webhook URL:xxx`；
+
+通过勾选下方的`events`来启用`GitLab`哪些事件可以触发构建，如果`GitLab`端配置了`Jenkins`未启用的事件，也不会被触发，在这里，我们选择`Push Events`；
+
+`webhook URL`是生命周期钩子，`GitLab`经过配置可以在`push events`发生后通过该钩子发送事件消息到`Jenkins`，进而触发构建；
+
+<img src="Jenkins.assets/image-20200422162138791.png" alt="image-20200422162138791" style="zoom:50%;" />
+
+进一步的，我们选择`高级`，选择下方的`Secret Token`的`Generate`来生成一个`Secret Token`，生成后，在`GitLab`端上只有配置了`Secret Token`的`webHook`才会触发构建；
+
+<img src="Jenkins.assets/image-20200422163815781.png" alt="image-20200422163815781" style="zoom:50%;" />
+
+接着，我们到`GitLab`上去创建一个`webHook`，我们进入`Project`，点选`设置`下的`Webhooks`去创建一个`webhook`，粘贴`Jenkins`的`webhook URL`和`Secret Token`，然后选择需要触发的事件，最后点击`Add Webhook`即可创建一个新的`webhook`，这样`GitLab`就能在事件触发后发送消息到`Jenkins`了；另外，由于我们的`webhook`使用`http`协议进行通信，因此需要取消掉`SSL verification`；
+
+<img src="Jenkins.assets/image-20200422164500557.png" alt="image-20200422164500557" style="zoom:50%;" />
+
+<img src="Jenkins.assets/image-20200422164526222.png" alt="image-20200422164526222" style="zoom: 50%;" />
+
+最后，我们在`Jenkins`的`构建`中可以配置我们需要构建执行的内容，我们可以试验一下，选择`执行shell`，然后输入：
+
+```
+echo 'hello world'
+```
+
+![image-20200422165732942](Jenkins.assets/image-20200422165732942.png)
+
+如果我们需要测试一下自动化构建的流程是否走通，我们可以在`GitLab`的`webhooks`处选择对应`webhook`后的`测试`选项，然后选择需要测试的事件；
+
+> 该操作要求仓库至少有一次`commit`；当然，也可以自己在本地创建仓库手动触发`push event`；
+
+<img src="Jenkins.assets/image-20200422170026818.png" alt="image-20200422170026818" style="zoom:50%;" />
+
+然后，在`Jenkins`端就会接收到`Push Event`开始自动化构建，并且在项目界面的左端的`Build History`面板显示构建情况：
+
+<img src="Jenkins.assets/image-20200423170327076.png" alt="image-20200423170327076" style="zoom:50%;" />
+
+我们可以点选`build job`来查看该`Job`的具体情况；
+
+<img src="Jenkins.assets/image-20200423170512426.png" alt="image-20200423170512426" style="zoom:50%;" />
 

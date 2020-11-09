@@ -51,15 +51,15 @@ npx node --inspect-brk ./node_modules/webpack/bin/webpack.js --inline --progress
 chrome://inspect/#device
 ~~~
 
-即可进入chrome的调试服务入口，会自动搜索到已开启的监视服务；
+即可进入`chrome`的调试服务入口，会自动搜索到已开启的监视服务；
 
 首先会打开我们的监视对象的执行入口，点击运行即可跑起我们要监视执行的文件或任务；
 
-如果使用了console.log()在webpack.config.js中进行打印，那么就会在控制台上打印出来；
+如果使用了`console.log()`在`webpack.config.js`中进行打印，那么就会在控制台上打印出来；
 
 ## 第三步 开始调试
 
-可以在代码中添加`debugger`作为断点，chrome调试台点击运行后，就会在debugger的位置上停止；可以使用step over进行单步调试等或者添加断点，推荐在下图这个位置设置断点：
+可以在代码中添加`debugger`作为断点，`chrome`调试台点击运行后，就会在`debugger`的位置上停止；可以使用`step over`进行单步调试等或者添加断点，推荐在下图这个位置设置断点：
 
 ~~~
 debugger
@@ -73,7 +73,7 @@ const webpackconfig = {
 
 ## 第四步 调试糖(选配)
 
-将命令添加到package.json的script标签下，方便我们用npm命令开启监视器；
+将命令添加到`package.json`的`script`标签下，方便我们用`npm`命令开启监视器；
 
 ~~~js
 {
@@ -87,7 +87,7 @@ const webpackconfig = {
 npm run webpack:debug
 ~~~
 
-# 使用VScode调试功能进行调试（不仅仅调试webpack）
+# 使用VScode调试功能进行调试（不仅仅调试`webpack`）
 
 ## 第一步 添加NodeJs环境下的launch.js
 

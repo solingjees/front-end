@@ -63,11 +63,11 @@ ssh-keygen -t rsa  //表示rsa加密
 
 首先，我们可以选择密钥保存的位置，粘贴一个新的绝对路径即可修改密钥保存的位置，默认位置在`~/.ssh`文件夹（该文件夹默认隐藏）下：
 
-<img src="../../../../../../Solingjees Smith/Desktop/工作日志/frontend/团队协作-文档与版本管理/项目开发团队协作-文档管理/DocManage.assets/image-20200329012857276.png" alt="image-20200329012857276" style="zoom:50%;" />
+<img src="../../团队协作-文档与版本管理/项目开发团队协作-文档管理/DocManage.assets/image-20200329012857276.png" alt="image-20200329012857276" style="zoom:50%;" />
 
 然后我们可以选择是否输入`passphrase`来给该密钥再添加一层锁，即每一次`ssh`连接时都要输入`passphrase`，目的是防止一对公私钥在被多人使用时意外泄露造成项目泄露：
 
-<img src="../../../../../../Solingjees Smith/Desktop/工作日志/frontend/团队协作-文档与版本管理/项目开发团队协作-文档管理/DocManage.assets/image-20200329013439072.png" alt="image-20200329013439072" style="zoom:50%;" />
+<img src="../../团队协作-文档与版本管理/项目开发团队协作-文档管理/DocManage.assets/image-20200329013439072.png" alt="image-20200329013439072" style="zoom:50%;" />
 
 然后重新输入`passphrase`，如果没有`passphrase`直接回车即可;
 
@@ -75,7 +75,7 @@ ssh-keygen -t rsa  //表示rsa加密
 
 然后我们打开密钥保存的位置查看以下，默认在`~/.ssh`：
 
-<img src="../../../../../../Solingjees Smith/Desktop/工作日志/frontend/团队协作-文档与版本管理/项目开发团队协作-文档管理/DocManage.assets/image-20200328132910110.png" alt="image-20200328132910110" style="zoom:50%;" />
+<img src="../../团队协作-文档与版本管理/项目开发团队协作-文档管理/DocManage.assets/image-20200328132910110.png" alt="image-20200328132910110" style="zoom:50%;" />
 
 其中，`id_rsa.pub`是公钥文件，`id_rsa`是密钥文件；
 
@@ -83,7 +83,7 @@ ssh-keygen -t rsa  //表示rsa加密
 
 我们进入`Github`用户页面，跟随`settings->SSH and GPG keys`，然后点击`New ssh key`，输入`description`和`公钥文件的内容`即可完成本地和`GitHub`的`ssh`连接；完成后，我们发现我们生成的密钥，并且在最后一行有`Read/Write`的提示，说明我们对自己的仓库具有读写的权限；
 
-<img src="../../../../../../Solingjees Smith/Desktop/工作日志/frontend/团队协作-文档与版本管理/项目开发团队协作-文档管理/DocManage.assets/image-20200328133747155.png" alt="image-20200328133747155" style="zoom:50%;" />
+<img src="../../团队协作-文档与版本管理/项目开发团队协作-文档管理/DocManage.assets/image-20200328133747155.png" alt="image-20200328133747155" style="zoom:50%;" />
 
 这样，我们就完成了`ssh`的配置，当我们发起一个`clone repository`的请求时，默认会使用`ssh`协议拉取本地`~/.ssh/id_rsa`文件下的私钥和`GitHub`的公钥进行验证来通信，但是对于不在`~/.ssh`下的公私钥，我们怎么配置来使得`ssh`连接时取到私钥呢？
 
@@ -131,7 +131,7 @@ git clone git@github-solingjees:solingjees/test.git
 
 在用户的个人页面选择`Repositories`进入自己的仓库页面，然后新建仓库：
 
-<img src="../../../../../../Solingjees Smith/Desktop/工作日志/frontend/团队协作-文档与版本管理/项目开发团队协作-文档管理/DocManage.assets/image-20200328131108731.png" alt="image-20200328131108731" style="zoom:50%;" />
+<img src="../项目开发团队协作-文档管理/DocManage.assets/image-20200328131108731.png" alt="image-20200328131108731" style="zoom:50%;" />
 
 然后设置`Repository name`来命名仓库，并添加`Description`，然后设置库的可见性：
 
@@ -142,7 +142,7 @@ git clone git@github-solingjees:solingjees/test.git
 
 
 
-<img src="../../../../../../Solingjees Smith/Desktop/工作日志/frontend/团队协作-文档与版本管理/项目开发团队协作-文档管理/DocManage.assets/image-20200328131529209.png" alt="image-20200328131529209" style="zoom:50%;" />
+<img src="../项目开发团队协作-文档管理/DocManage.assets/image-20200328131529209.png" alt="image-20200328131529209" style="zoom:50%;" />
 
 最后`Create repositroy`即可生成我们的仓库；
 
@@ -312,6 +312,7 @@ git push origin1 master
 
   + `git commit -m <comment content>`：给`commit`添加`comment`；
   + `git commit --allow-empty -m <comment content>`：在前者的基础上，允许`commit`的修改内容为空；
+  + `git commit --amend`：修改上一次`commit`的`comment`内容；
 
 + `git push`：用于将本地所有从上一次`git push`开始的所有`commit`同步到远程仓库，以下几个命令比较常用：
 
@@ -336,6 +337,8 @@ git push origin1 master
 
   + `git fetch `将分支的更新进行下载；
   + `git merge`将分支的更新和本地仓库进行合并；
+
+  > 在`git pull`之前请务必`git add + git commit`来保存本地代码，以防远程仓库被修改了导致冲突而无法拉取远程代码；
 
 + `git fetch`：用于拉取远程仓库的更新，该操作会拉取所有更新放入一个临时区域，然后更新本地分支信息，但是不会切换分支，可以用于检测远程分支的存在性，经常用的命令有：
 
